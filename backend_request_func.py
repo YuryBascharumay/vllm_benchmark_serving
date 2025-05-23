@@ -256,6 +256,8 @@ async def async_request_openai_completions(
     async with aiohttp.ClientSession(
         trust_env=True, timeout=AIOHTTP_TIMEOUT
     ) as session:
+        ### Revised: Add min_tokens to the payload
+        ### to ensure the model generates at least the specified number of tokens.
         payload = {
             "model": request_func_input.model_name
             if request_func_input.model_name
