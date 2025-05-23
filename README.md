@@ -73,11 +73,13 @@ This will generate a single file `aggregate_results.csv` that summarizes all res
 
 ```
 vllm_benchmark_serving/
+├── backend_request_func.py
+├── benchmark_serving.py
+├── benchmark_dataset.py
 ├── combos.yaml
 ├── run_sweep.py
 ├── aggregate_result.py
 ├── requirements.txt
-├── ...
 └── results/
     ├── run_1.json
     ├── run_2.json
