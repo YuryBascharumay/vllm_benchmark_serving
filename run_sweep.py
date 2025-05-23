@@ -59,6 +59,7 @@ def main():
         "--base-url", base_url,
         "--tokenizer", tokenizer,
         "--dataset-name", "random",
+        "--percentile-metrics", "ttft,tpot,itl,e2el"
     ]
 
     # 크로스-조합 실행 (각 io_pair마다 모든 concurrency-num_prompts 쌍)
