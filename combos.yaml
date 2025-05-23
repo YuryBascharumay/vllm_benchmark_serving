@@ -1,5 +1,5 @@
 # Set the model name and server base URL here
-model: "EXAONE-3.5-32B-Instruct-32k"        # served model name that you set in vllm server
+model: "Llama-3.2-1B"        # served model name that you set in vllm server
 base_url: "http://localhost:8000"  # or http://{ip_address}:{port}
 tokenizer: "path_tokenizer"  # path that includes tokenizer file in which you set in vllm server
 # for dataset random, you need to set tokenizer and it will generate random dataset based on it
