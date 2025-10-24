@@ -19,6 +19,7 @@ import io
 import json
 import logging
 import random
+import datetime
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -328,8 +329,11 @@ class RandomDataset(BenchmarkDataset):
         output_high = int(output_len * (1 + range_ratio))
 
         # Add logging for debugging
-        logger.info("Sampling input_len from [%s, %s]", input_low, input_high)
-        logger.info("Sampling output_len from [%s, %s]", output_low, output_high)
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        logger.info("%s - Sampling input_len from [%s, %s]", current_time, input_low, input_high)
+
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        logger.info("%s - Sampling output_len from [%s, %s]", current_time, output_low, output_high)
 
         input_lens = np.random.randint(input_low, input_high + 1, size=num_requests)
         output_lens = np.random.randint(output_low, output_high + 1, size=num_requests)
