@@ -36,7 +36,11 @@ from transformers import PreTrainedTokenizerBase
 from vllm.lora.request import LoRARequest
 from vllm.lora.utils import get_adapter_absolute_path
 from vllm.multimodal import MultiModalDataDict
-from vllm.transformers_utils.tokenizer import AnyTokenizer, get_lora_tokenizer
+
+try:
+    from vllm.transformers_utils.tokenizer import AnyTokenizer, get_lora_tokenizer
+except ImportError:
+    from vllm.transformers_utils.tokenizer import AnyTokenizer, get_tokenizer
 
 logger = logging.getLogger(__name__)
 
