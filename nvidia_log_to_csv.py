@@ -6,6 +6,9 @@ import argparse
 
 
 def parse_nvidia_log_to_csv(input_file, output_file):
+    """
+    Парсит один файл лога nvidia-smi и сохраняет в csv.
+    """
     # Регулярные выражения
     date_pattern = re.compile(r"^(\w{3}\s+\w{3}\s+\d+\s+\d{2}:\d{2}:\d{2}\s+\S*\s?\d{4})")
     gpu_id_pattern = re.compile(r"\|\s+(\d+)\s+NVIDIA")
@@ -70,47 +73,93 @@ def parse_nvidia_log_to_csv(input_file, output_file):
                 writer.writeheader()
                 writer.writerows(rows_to_write)
 
-            print(f"[OK] Обработано записей: {len(rows_to_write)}")
-            print(f"[OK] Результат сохранен в: {output_file}")
+            print(
+                f"[OK] {os.path.basename(input_file)} -> {os.path.basename(output_file)} ({len(rows_to_write)} строк)")
         else:
-            print("[INFO] В файле не найдено данных для парсинга.")
+            print(f"[SKIP] В файле {os.path.basename(input_file)} не найдено данных.")
 
     except Exception as e:
-        print(f"[ERROR] Ошибка при обработке: {e}")
+        print(f"[ERROR] Ошибка при обработке {input_file}: {e}")
+
+
+def process_directory(directory):
+    """
+    Сканирует папку на наличие .txt и запускает парсер для каждого.
+    """
+    if not os.path.exists(directory):
+        print(f"[ERROR] Папка '{directory}' не существует.")
+        return
+
+    # Получаем список всех .txt файлов
+    files = [f for f in os.listdir(directory) if f.endswith(".txt")]
+
+    if not files:
+        print(f"[INFO] В папке '{directory}' нет файлов с расширением .txt")
+        return
+
+    print(f"Обработка папки '{directory}'. Найдено файлов: {len(files)}")
+
+    for filename in files:
+        input_path = os.path.join(directory, filename)
+
+        # Генерируем имя выходного файла (заменяем .txt на .csv)
+        output_filename = os.path.splitext(filename)[0] + ".csv"
+        output_path = os.path.join(directory, output_filename)
+
+        parse_nvidia_log_to_csv(input_path, output_path)
 
 
 def main():
     parser = argparse.ArgumentParser(description="Парсер логов nvidia-smi в CSV.")
 
-    parser.add_argument(
+    # Убрали required=True, теперь группа необязательна
+    group = parser.add_mutually_exclusive_group(required=False)
+
+    group.add_argument(
         '-i', '--input',
         type=str,
-        default='gpu_log.txt',
-        help='Путь к входному файлу лога'
+        help='Путь к одному файлу лога (.txt)'
+    )
+
+    group.add_argument(
+        '-d', '--dir',
+        type=str,
+        help='Путь к папке (по умолчанию: results)'
     )
 
     parser.add_argument(
         '-o', '--output',
         type=str,
-        required=False,
-        help='Путь к выходному CSV файлу (по умолчанию: рядом с исходным)'
+        help='Путь к выходному CSV (только для режима -i)'
     )
 
     args = parser.parse_args()
-    input_filename = args.input
 
-    if not os.path.exists(input_filename):
-        print(f"[ERROR] Файл '{input_filename}' не существует.")
-        sys.exit(1)
+    # ЛОГИКА ВЫБОРА РЕЖИМА
 
-    if args.output:
-        output_filename = args.output
+    # 1. Если указан конкретный файл (-i)
+    if args.input:
+        if not os.path.exists(args.input):
+            print(f"[ERROR] Файл '{args.input}' не существует.")
+            sys.exit(1)
+
+        if args.output:
+            output_filename = args.output
+        else:
+            base_name, _ = os.path.splitext(args.input)
+            output_filename = base_name + ".csv"
+
+        parse_nvidia_log_to_csv(args.input, output_filename)
+
+    # 2. Если указана конкретная папка (-d)
+    elif args.dir:
+        process_directory(args.dir)
+
+    # 3. ПО УМОЛЧАНИЮ (если ничего не указано) -> папка results
     else:
-        base_name, _ = os.path.splitext(input_filename)
-        output_filename = base_name + ".csv"
-
-    print(f"Чтение файла: {input_filename}")
-    parse_nvidia_log_to_csv(input_filename, output_filename)
+        default_dir = "results"
+        print(f"[INFO] Аргументы не указаны. Ищем логи в папке '{default_dir}'...")
+        process_directory(default_dir)
 
 
 if __name__ == "__main__":
