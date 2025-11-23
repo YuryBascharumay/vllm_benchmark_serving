@@ -112,7 +112,6 @@ def process_directory(directory):
 def main():
     parser = argparse.ArgumentParser(description="Парсер логов nvidia-smi в CSV.")
 
-    # Убрали required=True, теперь группа необязательна
     group = parser.add_mutually_exclusive_group(required=False)
 
     group.add_argument(
@@ -135,9 +134,6 @@ def main():
 
     args = parser.parse_args()
 
-    # ЛОГИКА ВЫБОРА РЕЖИМА
-
-    # 1. Если указан конкретный файл (-i)
     if args.input:
         if not os.path.exists(args.input):
             print(f"[ERROR] Файл '{args.input}' не существует.")
@@ -151,11 +147,9 @@ def main():
 
         parse_nvidia_log_to_csv(args.input, output_filename)
 
-    # 2. Если указана конкретная папка (-d)
     elif args.dir:
         process_directory(args.dir)
 
-    # 3. ПО УМОЛЧАНИЮ (если ничего не указано) -> папка results
     else:
         default_dir = "results"
         print(f"[INFO] Аргументы не указаны. Ищем логи в папке '{default_dir}'...")
